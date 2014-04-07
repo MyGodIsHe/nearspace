@@ -44,7 +44,6 @@ public class Map : MonoBehaviour {
 				GameObject jump = Instantiate (jumpPrefab) as GameObject;
 				jump.transform.parent = cube.transform;
 				jump.transform.position = cube.transform.position + Vector3.up;
-				cube.renderer.material.color = Color.black;
 				cube.AddComponent<EndCube>();
 			}
 			objects.Add(cube);
