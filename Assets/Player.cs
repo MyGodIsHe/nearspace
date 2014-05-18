@@ -29,7 +29,6 @@ public class Player : MonoBehaviour {
 			Camera.main.GetComponent<Map> ().RestartLevel ();
 		}
 
-
 		fixParticles ();
 	}
 
@@ -77,6 +76,18 @@ public class Player : MonoBehaviour {
 		rigidbody.velocity = attached.rigidbody.velocity;
 		rigidbody.AddForce(orientation * EXPLOSION_FORCE * 2);
 		attached = null;
+	}
+	
+	public void Teleport(Vector3 position) {
+		rigidbody.isKinematic = false;
+		attached = null;
+		transform.position = position + Vector3.up * 0.5f;
+	}
+	
+	public void Teleport(GameObject portal) {
+		rigidbody.isKinematic = false;
+		attached = null;
+		transform.position = portal.transform.parent.transform.position + Vector3.up * 0.5f;
 	}
 	
 	void OnTriggerEnter(Collider other) {
