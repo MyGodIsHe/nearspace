@@ -4,6 +4,7 @@ using System.Collections;
 public class Player : MonoBehaviour {
 
 	private GameObject attached;
+	private Vector3 prevuseOrientation = Vector3.zero;
 	private Vector3 orientation;
 
 	private Vector3 newPosition;
@@ -13,20 +14,22 @@ public class Player : MonoBehaviour {
 
 	
 	void Update () {
-		if (Input.GetKey (KeyCode.Escape))
-			Application.Quit ();
 		if (attached) {
 			updateOrientation();
 
-			from = Vector3.RotateTowards(from, orientation, Time.deltaTime * 5, Time.deltaTime);
+			if (prevuseOrientation == Vector3.zero)
+				from = Vector3.Lerp(from, orientation, Time.deltaTime * 20);
+			else
+				from = Vector3.RotateTowards(from, orientation, Time.deltaTime * 10, Time.deltaTime);
 			transform.position = attached.transform.position + from;
 
 			if (Input.GetKeyUp(KeyCode.Space) && orientation != Vector3.up) {
-				attached.rigidbody.AddForce(-orientation * EXPLOSION_FORCE);
+				if (!attached.rigidbody.isKinematic)
+					attached.rigidbody.AddForce(-orientation * EXPLOSION_FORCE);
 				Jump();
 			}
 		} else if (rigidbody.isKinematic) {
-			Camera.main.GetComponent<Map> ().RestartLevel ();
+			// die
 		}
 
 		fixParticles ();
@@ -34,12 +37,17 @@ public class Player : MonoBehaviour {
 
 	void fixParticles() {
 		Vector3 localVelocity = attached ? attached.rigidbody.velocity: Vector3.zero;
-		foreach (ParticleEmitter pe in GetComponentsInChildren<ParticleEmitter>()) {
-			pe.localVelocity = localVelocity;
+		foreach (Transform obj in GetComponentInChildren<Transform>()) {
+			if (obj.name == "Tail") {
+				foreach (ParticleEmitter pe in obj.GetComponentsInChildren<ParticleEmitter>()) {
+					pe.localVelocity = localVelocity;
+				}
+			}
 		}
 	}
 
 	void updateOrientation() {
+		Vector3 save = orientation;
 		if (Input.GetKeyUp (KeyCode.A)) {
 			if (orientation == Vector3.right) {
 				orientation = Vector3.up;
@@ -68,6 +76,9 @@ public class Player : MonoBehaviour {
 				orientation = Vector3.back;
 			}
 		}
+		if (save != orientation) {
+			prevuseOrientation = save;
+		}
 	}
 	
 	public void Jump() {
@@ -75,25 +86,39 @@ public class Player : MonoBehaviour {
 		rigidbody.isKinematic = false;
 		rigidbody.velocity = attached.rigidbody.velocity;
 		rigidbody.AddForce(orientation * EXPLOSION_FORCE * 2);
+		attached.GetComponent<Cube>().UnAttach();
 		attached = null;
 	}
 	
 	public void Teleport(Vector3 position) {
 		rigidbody.isKinematic = false;
+		attached.GetComponent<Cube>().UnAttach();
 		attached = null;
 		transform.position = position + Vector3.up * 0.5f;
 	}
 	
 	public void Teleport(GameObject portal) {
 		rigidbody.isKinematic = false;
+		attached.GetComponent<Cube>().UnAttach();
 		attached = null;
 		transform.position = portal.transform.parent.transform.position + Vector3.up * 0.5f;
+	}
+
+	public void AttachedDestroy() {
+		rigidbody.isKinematic = false;
+		rigidbody.velocity = attached.rigidbody.velocity;
+		attached = null;
+	}
+
+	public void OnTriggerWall() {
+		if (attached)
+			orientation = prevuseOrientation;
+		else
+			rigidbody.velocity = -rigidbody.velocity;
 	}
 	
 	void OnTriggerEnter(Collider other) {
 		if (other.gameObject.tag == "Cube") {
-			//if (!attached)
-			//	other.gameObject.rigidbody.AddForce(rigidbody.velocity * 10);
 			Attach (other.gameObject);
 		}
 	}
@@ -121,8 +146,11 @@ public class Player : MonoBehaviour {
 
 	public void Attach(GameObject target) {
 		rigidbody.isKinematic = true;
+		if (attached != null)
+			attached.GetComponent<Cube>().UnAttach();
 		attached = target;
 		orientation = FindOrientation (target.transform.position);
 		from = transform.position - attached.transform.position;
+		prevuseOrientation = Vector3.zero;
 	}
 }

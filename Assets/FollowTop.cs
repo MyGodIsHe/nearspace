@@ -5,7 +5,7 @@ using System.Collections;
 public class FollowTop : MonoBehaviour {
 
 	private GameObject target;
-	readonly float distance = 10;
+	readonly float distance = 5;
 	private Vector3 center;
 	private Vector3 velocity = Vector3.zero;
 

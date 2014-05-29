@@ -7,7 +7,7 @@ public class Jump : MonoBehaviour {
 		if (other.gameObject.tag == "Player") {
 			Player player = other.gameObject.GetComponent<Player>();
 			player.Jump();
-			Camera.main.GetComponent<Map>().NextLevel(player.transform.position);
+			// to next level
 		}
 	}
 }

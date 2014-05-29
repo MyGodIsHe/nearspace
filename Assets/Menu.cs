@@ -13,8 +13,6 @@ public class Menu : MonoBehaviour {
 	private readonly int buttonPadding = 10;
 	private string[] levels;
 
-	private Map mapComponent;
-
 	void Awake () {
 		object[] rawLevels = Resources.LoadAll("", typeof(TextAsset));
 		levels = new string[rawLevels.Length];
@@ -22,8 +20,6 @@ public class Menu : MonoBehaviour {
 		foreach (TextAsset level in rawLevels) {
 			levels[i++] = level.name;
 		}
-
-		mapComponent = GetComponent<Map>();
 	}
 
 	void OnGUI() {
@@ -49,8 +45,7 @@ public class Menu : MonoBehaviour {
 				                          15 + boxPadding + buttonPadding + j * (buttonHeight + buttonPadding),
 				                          buttonWidth, buttonHeight),
 				                level)) {
-					isActive = false;
-					mapComponent.JumpTo(level);
+					// none
 				}
 				if (!enumLevels.MoveNext())
 					break;
