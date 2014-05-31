@@ -54,7 +54,9 @@ public class Menu : MonoBehaviour {
 	}
 	
 	void Update () {
-		if (Input.GetKeyDown (KeyCode.Escape))
-			isActive = !isActive;
+		if (Input.GetKeyDown (KeyCode.Escape)) {
+			Application.Quit();
+			//isActive = !isActive;
+		}
 	}
 }

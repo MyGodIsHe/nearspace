@@ -15,7 +15,7 @@ public class Wall : MonoBehaviour {
 
 	void OnTriggerEnter(Collider other) {
 		if (other.gameObject.tag == "Player") {
-			other.GetComponent<Player>().OnTriggerWall();
+			other.GetComponent<Player>().OnTriggerWall(gameObject);
 		}
 	}
 }

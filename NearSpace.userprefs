@@ -1,13 +1,15 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Player.cs">
+  <MonoDevelop.Ide.Workspace />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Resources\start.txt">
     <Files>
-      <File FileName="Assets\Room.cs" Line="35" Column="24" />
-      <File FileName="Assets\Player.cs" Line="28" Column="6" />
-      <File FileName="Assets\StaticTop.cs" Line="46" Column="2" />
-      <File FileName="Assets\Map.cs" Line="33" Column="25" />
-      <File FileName="Assets\StopCube.cs" Line="21" Column="53" />
-      <File FileName="Assets\Cube.cs" Line="64" Column="29" />
+      <File FileName="Assets\Door.cs" Line="26" Column="47" />
+      <File FileName="Assets\Map.cs" Line="17" Column="32" />
+      <File FileName="Assets\Room.cs" Line="18" Column="29" />
+      <File FileName="Assets\Player.cs" Line="50" Column="1" />
+      <File FileName="Assets\Cube.cs" Line="43" Column="57" />
+      <File FileName="Assets\Wall.cs" Line="18" Column="57" />
+      <File FileName="Assets\Resources\6.txt" Line="7" Column="14" />
+      <File FileName="Assets\Resources\start.txt" Line="9" Column="8" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

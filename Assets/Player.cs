@@ -3,16 +3,26 @@ using System.Collections;
 
 public class Player : MonoBehaviour {
 
-	private GameObject attached;
-	private Vector3 prevuseOrientation = Vector3.zero;
-	private Vector3 orientation;
+	GameObject attached;
+	Vector3 prevuseOrientation = Vector3.zero;
+	Vector3 orientation;
 
-	private Vector3 newPosition;
+	Vector3 newPosition;
+	GameController gameController;
+	Light lightsource;
+	GameGUI gameGUI;
 
-	private Vector3 from;
+	Vector3 from;
 	const float EXPLOSION_FORCE = 200;
-
+	const float ALTITUDE = 0.75f;
 	
+	void Awake() {
+		gameGUI = Camera.main.GetComponent<GameGUI>();
+		gameController = Camera.main.GetComponent<GameController>();
+		lightsource = GetComponentInChildren<Light>();
+		lightsource.enabled = false;
+	}
+
 	void Update () {
 		if (attached) {
 			updateOrientation();
@@ -21,7 +31,7 @@ public class Player : MonoBehaviour {
 				from = Vector3.Lerp(from, orientation, Time.deltaTime * 20);
 			else
 				from = Vector3.RotateTowards(from, orientation, Time.deltaTime * 10, Time.deltaTime);
-			transform.position = attached.transform.position + from;
+			transform.position = attached.transform.position + from * ALTITUDE;
 
 			if (Input.GetKeyUp(KeyCode.Space) && orientation != Vector3.up) {
 				if (!attached.rigidbody.isKinematic)
@@ -32,7 +42,18 @@ public class Player : MonoBehaviour {
 			// die
 		}
 
-		fixParticles ();
+		fixParticles();
+		animateDetonate();
+	}
+
+	void animateDetonate() {
+		float progress = gameController.GetDetonateProgress();
+		if (progress > 0) {
+			lightsource.enabled = true;
+			lightsource.intensity = progress * 10;
+		} else {
+			lightsource.enabled = false;
+		}
 	}
 
 	void fixParticles() {
@@ -48,28 +69,28 @@ public class Player : MonoBehaviour {
 
 	void updateOrientation() {
 		Vector3 save = orientation;
-		if (Input.GetKeyUp (KeyCode.A)) {
+		if (Input.GetKeyDown (KeyCode.A)) {
 			if (orientation == Vector3.right) {
 				orientation = Vector3.up;
 			} else {
 				orientation = Vector3.left;
 			}
 		}
-		if (Input.GetKeyUp (KeyCode.W)) {
+		if (Input.GetKeyDown (KeyCode.W)) {
 			if (orientation == Vector3.back) {
 				orientation = Vector3.up;
 			} else {
 				orientation = Vector3.forward;
 			}
 		}
-		if (Input.GetKeyUp (KeyCode.D)) {
+		if (Input.GetKeyDown (KeyCode.D)) {
 			if (orientation == Vector3.left) {
 				orientation = Vector3.up;
 			} else {
 				orientation = Vector3.right;
 			}
 		}
-		if (Input.GetKeyUp (KeyCode.S)) {
+		if (Input.GetKeyDown (KeyCode.S)) {
 			if (orientation == Vector3.forward) {
 				orientation = Vector3.up;
 			} else {
@@ -78,16 +99,27 @@ public class Player : MonoBehaviour {
 		}
 		if (save != orientation) {
 			prevuseOrientation = save;
+			RaycastHit hit;
+			if (Physics.Raycast(attached.transform.position, orientation, out hit)) {
+				if (hit.collider.gameObject.CompareTag("Cube")) {
+					if (hit.distance < Cube.WORLD_HALF_SIZE * 1.1f) {
+						transform.position = attached.transform.position + save;
+						Attach (hit.collider.gameObject);
+						orientation = save;
+					}
+				}
+			}
 		}
 	}
 	
 	public void Jump() {
-		transform.position = attached.transform.position + orientation;
+		transform.position = attached.transform.position + orientation * ALTITUDE;
 		rigidbody.isKinematic = false;
 		rigidbody.velocity = attached.rigidbody.velocity;
 		rigidbody.AddForce(orientation * EXPLOSION_FORCE * 2);
 		attached.GetComponent<Cube>().UnAttach();
 		attached = null;
+		gameGUI.Life--;
 	}
 	
 	public void Teleport(Vector3 position) {
@@ -110,15 +142,17 @@ public class Player : MonoBehaviour {
 		attached = null;
 	}
 
-	public void OnTriggerWall() {
+	public void OnTriggerWall(GameObject wall) {
 		if (attached)
 			orientation = prevuseOrientation;
-		else
-			rigidbody.velocity = -rigidbody.velocity;
+		else {
+			Vector3 normal = wall.transform.rotation * Vector3.right;
+			rigidbody.velocity = rigidbody.velocity - 2 * Vector3.Dot(rigidbody.velocity, normal) * normal;
+		}
 	}
 	
 	void OnTriggerEnter(Collider other) {
-		if (other.gameObject.tag == "Cube") {
+		if (other.gameObject.tag == "Cube" && attached != other.gameObject) {
 			Attach (other.gameObject);
 		}
 	}

@@ -13,6 +13,9 @@ public class Room : MonoBehaviour {
 	const float height = 1;
 	Level level;
 	List<GameObject> doors = new List<GameObject>();
+	Vector3 enterPlayerPosition = Vector3.zero;
+	Vector3 enterPlayerVelosity = Vector3.zero;
+	bool isDeactivated = false;
 
 	Vector3 V2toV3 (Vector2 pos) {
 		Vector3 offset = transform.position;
@@ -150,7 +153,8 @@ public class Room : MonoBehaviour {
 	
 	void OnTriggerEnter(Collider other) {
 		if (other.gameObject.tag == "Player") {
-			Lock();
+			enterPlayerPosition = other.gameObject.transform.position;
+			enterPlayerVelosity = other.gameObject.rigidbody.velocity;
 		}
 	}
 
@@ -158,19 +162,36 @@ public class Room : MonoBehaviour {
 		if (other.gameObject.tag == "Player") {
 			Vector3 direction = other.gameObject.transform.position - transform.position;
 			direction.Normalize();
-			Camera.main.GetComponent<Map>().MoveTo((int)direction.x, -(int)direction.z);
+			Camera.main.GetComponent<Map>().MoveTo(Mathf.RoundToInt(direction.x), -Mathf.RoundToInt(direction.z));
+		} else {
+			Destroy(other.gameObject);
 		}
 	}
 
 	public void Lock() {
+		if (isDeactivated)
+			return;
 		foreach(GameObject obj in doors) {
 			obj.GetComponent<Door>().Close();
 		}
 	}
 
 	public void Unlock() {
+		isDeactivated = true;
 		foreach(GameObject obj in doors) {
 			obj.GetComponent<Door>().Open();
+		}
+	}
+
+	public Vector3 EnterPlayerPosition {
+		get {
+			return enterPlayerPosition;
+		}
+	}
+	
+	public Vector3 EnterPlayerVelosity {
+		get {
+			return enterPlayerVelosity;
 		}
 	}
 }

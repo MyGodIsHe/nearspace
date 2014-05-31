@@ -55,6 +55,7 @@
      <None Include="Assets\Resources\1.txt" />
      <None Include="Assets\Resources\5.txt" />
      <None Include="Assets\Resources\4.txt" />
+     <None Include="Assets\Resources\6.txt" />
      <None Include="Assets\Resources\2.txt" />
      <None Include="Assets\Standard Assets\Toon Shading\Sources\Shaders\Toony-BasicOutline.shader" />
      <None Include="Assets\Standard Assets\Projectors\Sources\Shaders\Projector Light.shader" />

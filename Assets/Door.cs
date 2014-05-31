@@ -23,7 +23,7 @@ public class Door : MonoBehaviour {
 	
 	void OnTriggerEnter(Collider other) {
 		if (!isOpen && other.gameObject.tag == "Player") {
-			other.GetComponent<Player>().OnTriggerWall();
+			other.GetComponent<Player>().OnTriggerWall(gameObject);
 		}
 	}
 }

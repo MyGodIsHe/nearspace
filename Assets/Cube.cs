@@ -38,8 +38,10 @@ public class Cube : MonoBehaviour {
 	}
 	
 	void OnTriggerEnter(Collider other) {
-		if (other.gameObject.tag == "Player")
+		if (other.gameObject.tag == "Player" && attached == null) {
 			attached = other.gameObject;
+			transform.parent.gameObject.GetComponent<Room>().Lock();
+		}
 		if (other.gameObject.tag == "Cube") {
 			audio.PlayOneShot(collisionSound);
 			stop(gameObject);
