@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Door : MonoBehaviour {
+public class Door : Wall {
 
 	bool isOpen = false;
 
@@ -21,9 +21,9 @@ public class Door : MonoBehaviour {
 		renderer.enabled = true;
 	}
 	
-	void OnTriggerEnter(Collider other) {
-		if (!isOpen && other.gameObject.tag == "Player") {
-			other.GetComponent<Player>().OnTriggerWall(gameObject);
+	new void OnTriggerEnter2D(Collider2D other) {
+		if (!isOpen) {
+			base.OnTriggerEnter2D(other);
 		}
 	}
 }

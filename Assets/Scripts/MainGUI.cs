@@ -21,6 +21,7 @@ public class MainGUI : MonoBehaviour {
 		btnStyle.alignment = TextAnchor.MiddleCenter;
 		btnStyle.fontSize = (int)(kY * 12f);
 		GUI.color = Color.white;
+
 		if (GUI.Button(getRect(50f, 35f, 20f, 14f), "Start", btnStyle)) {
 			Application.LoadLevel("Game");
 		}

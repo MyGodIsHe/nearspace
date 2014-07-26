@@ -36,6 +36,6 @@ public class StaticTopOver : MonoBehaviour {
 	public void SetViewRange(float roomSize) {
 		camera.orthographicSize = 1;
 		Vector3 view = camera.ViewportToWorldPoint(Vector3.one) - camera.ViewportToWorldPoint(Vector3.zero);
-		camera.orthographicSize = roomSize / Mathf.Min(view.x, view.z);
+		camera.orthographicSize = roomSize / Mathf.Min(view.x, view.y);
 	}
 }

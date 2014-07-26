@@ -11,8 +11,8 @@ public class StopCube : Cube {
 	void Start () {
 		rays[0] = new Ray("LeftRay", Vector3.left, transform, rayPrefab);
 		rays[1] = new Ray("RightRay", Vector3.right, transform, rayPrefab);
-		rays[2] = new Ray("UpRay", Vector3.forward, transform, rayPrefab);
-		rays[3] = new Ray("DownRay", Vector3.back, transform, rayPrefab);
+		rays[2] = new Ray("UpRay", Vector3.up, transform, rayPrefab);
+		rays[3] = new Ray("DownRay", Vector3.down, transform, rayPrefab);
 	}
 
 	void FixedUpdate () {
@@ -32,7 +32,7 @@ public class StopCube : Cube {
 			ray.transform.parent = transform;
 			float angle = Vector3.Angle(Vector3.right, direction);
 			float sign = Mathf.Sign(Vector3.Dot(Vector3.right, direction));
-			ray.transform.rotation = Quaternion.Euler(90, sign * angle, 0);
+			ray.transform.rotation = Quaternion.Euler(0, 0, sign * angle);
 			this.direction = direction;
 			this.transform = transform;
 		}

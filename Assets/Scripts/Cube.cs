@@ -25,32 +25,35 @@ public class Cube : MonoBehaviour {
 	}
 
 	protected static Vector3 round(Vector3 v) {
-		return new Vector3 (Mathf.Round (v.x),
-		                    Mathf.Round (v.y),
-		                    Mathf.Round (v.z));
+		return new Vector3 (Mathf.Round (v.x), Mathf.Round (v.y), v.z);
 	}
 
 	protected static void stop(GameObject obj) {
-		if (obj.rigidbody.isKinematic)
+		if (obj.rigidbody2D.isKinematic)
 			return;
-		obj.rigidbody.velocity = Vector3.zero;
+		obj.rigidbody2D.velocity = Vector3.zero;
 		obj.transform.position = round(obj.transform.position);
 	}
 	
-	void OnTriggerEnter(Collider other) {
-		if (other.gameObject.tag == "Player" && attached == null) {
-			attached = other.gameObject;
-			transform.parent.gameObject.GetComponent<Room>().Lock();
-		}
-		if (other.gameObject.tag == "Cube") {
+	void OnTriggerEnter2D(Collider2D other) {
+		switch (other.gameObject.tag) {
+		case "Player":
+			if (attached == null) {
+				attached = other.gameObject;
+				transform.parent.gameObject.GetComponent<Room>().Lock();
+			}
+			break;
+		case "Cube":
 			audio.pitch = 1 + Random.Range(-0.1f, 0.1f);
 			audio.PlayOneShot(collisionSound);
 			stop(gameObject);
 			stop(other.gameObject);
-		} else if (other.gameObject.tag == "Wall") {
+			break;
+		case "Wall":
 			audio.pitch = 1 + Random.Range(-0.1f, 0.1f);
 			audio.PlayOneShot(collisionSound);
 			stop(gameObject);
+			break;
 		}
 	}
 
@@ -60,7 +63,7 @@ public class Cube : MonoBehaviour {
 	}
 	
 	void freezeProcess() {
-		if (!rigidbody.isKinematic)
+		if (!rigidbody2D.isKinematic)
 			return;
 		if (transform.position != freezePosition) {
 			var distCovered = (Time.time - startFreeze) * 0.5f;
@@ -68,7 +71,7 @@ public class Cube : MonoBehaviour {
 			transform.position = Vector3.Lerp(transform.position, freezePosition, frac);
 		}
 		if (Time.time - lastHitFreeze > FREEZE_TIME) {
-			rigidbody.isKinematic = false;
+			rigidbody2D.isKinematic = false;
 			startFreeze = 0;
 		}
 	}
@@ -77,7 +80,7 @@ public class Cube : MonoBehaviour {
 		lastHitFreeze = Time.time;
 		if (startFreeze == 0) {
 			startFreeze = Time.time;
-			rigidbody.isKinematic = true;
+			rigidbody2D.isKinematic = true;
 			freezePosition = position;
 			freezeLength = Vector3.Distance(transform.position, position);
 		}

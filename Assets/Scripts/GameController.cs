@@ -4,8 +4,8 @@ using System.Collections;
 
 public class GameController : MonoBehaviour {
 
-	public float viewDelay = 0.5f;
-	public float detonateDelay = 2;
+	public float viewDelay = 0.1f;
+	public float detonateDelay = 1;
 
 	float[] times;
 
@@ -56,7 +56,7 @@ public class GameController : MonoBehaviour {
 		return time != 0 && Time.time - time > viewDelay;
 	}
 
-	public Vector3 GetViewDirectio() {
+	public Vector3 GetViewDirection() {
 		Vector3 direction = Vector3.zero;
 
 		if (isActiveDirection(Action.Left))
@@ -66,10 +66,10 @@ public class GameController : MonoBehaviour {
 			direction += Vector3.right;
 		
 		if (isActiveDirection(Action.Up))
-			direction += Vector3.forward;
+			direction += Vector3.up;
 		
 		if (isActiveDirection(Action.Down))
-			direction += Vector3.back;
+			direction += Vector3.down;
 
 		return direction;
 	}

@@ -24,22 +24,27 @@ public class Player : MonoBehaviour {
 	}
 
 	void Update () {
+		if (State.IsPause)
+			return;
 		if (attached) {
 			updateOrientation();
 
-			if (prevuseOrientation == Vector3.zero)
-				from = Vector3.Lerp(from, orientation, Time.deltaTime * 20);
-			else
-				from = Vector3.RotateTowards(from, orientation, Time.deltaTime * 10, Time.deltaTime);
-			transform.position = attached.transform.position + from * ALTITUDE;
+			transform.position = Vector3.MoveTowards(
+				transform.position,
+				attached.transform.position + orientation * ALTITUDE,
+				0.15f);
 
-			if (Input.GetKeyUp(KeyCode.Space) && orientation != Vector3.up) {
-				if (!attached.rigidbody.isKinematic)
-					attached.rigidbody.AddForce(-orientation * EXPLOSION_FORCE);
+			if (Input.GetKeyUp(KeyCode.Space) && orientation != Vector3.back) {
+				if (!attached.rigidbody2D.isKinematic &&
+				    (attached.rigidbody2D.velocity == Vector2.zero ||
+				     orientation != Vector3.zero)) {
+					RaycastHit2D hit = Physics2D.Raycast(attached.transform.position - orientation * Cube.WORLD_HALF_SIZE, -orientation);
+					if (hit && hit.fraction > 0.1f) {
+						attached.rigidbody2D.AddForce(-orientation * EXPLOSION_FORCE);
+					}
+				}
 				Jump();
 			}
-		} else if (rigidbody.isKinematic) {
-			// die
 		}
 
 		fixParticles();
@@ -57,7 +62,7 @@ public class Player : MonoBehaviour {
 	}
 
 	void fixParticles() {
-		Vector3 localVelocity = attached ? attached.rigidbody.velocity: Vector3.zero;
+		Vector2 localVelocity = attached ? attached.rigidbody2D.velocity: Vector2.zero;
 		foreach (Transform obj in GetComponentInChildren<Transform>()) {
 			if (obj.name == "Tail") {
 				foreach (ParticleEmitter pe in obj.GetComponentsInChildren<ParticleEmitter>()) {
@@ -71,41 +76,45 @@ public class Player : MonoBehaviour {
 		Vector3 save = orientation;
 		if (Input.GetKeyDown (KeyCode.A)) {
 			if (orientation == Vector3.right) {
-				orientation = Vector3.up;
+				//orientation = Vector3.back;
 			} else {
 				orientation = Vector3.left;
 			}
 		}
 		if (Input.GetKeyDown (KeyCode.W)) {
-			if (orientation == Vector3.back) {
-				orientation = Vector3.up;
+			if (orientation == Vector3.down) {
+				//orientation = Vector3.back;
 			} else {
-				orientation = Vector3.forward;
+				orientation = Vector3.up;
 			}
 		}
 		if (Input.GetKeyDown (KeyCode.D)) {
 			if (orientation == Vector3.left) {
-				orientation = Vector3.up;
+				//orientation = Vector3.back;
 			} else {
 				orientation = Vector3.right;
 			}
 		}
 		if (Input.GetKeyDown (KeyCode.S)) {
-			if (orientation == Vector3.forward) {
-				orientation = Vector3.up;
+			if (orientation == Vector3.up) {
+				//orientation = Vector3.back;
 			} else {
-				orientation = Vector3.back;
+				orientation = Vector3.down;
 			}
 		}
 		if (save != orientation) {
 			prevuseOrientation = save;
-			RaycastHit hit;
-			if (Physics.Raycast(attached.transform.position, orientation, out hit)) {
-				if (hit.collider.gameObject.CompareTag("Cube")) {
-					if (hit.distance < Cube.WORLD_HALF_SIZE * 1.1f) {
-						transform.position = attached.transform.position + save;
+			if (orientation != Vector3.back) {
+				RaycastHit2D hit = Physics2D.Raycast(attached.transform.position + orientation * Cube.WORLD_HALF_SIZE, orientation);
+				if (hit && hit.fraction < 0.1f) {
+					switch(hit.collider.gameObject.tag) {
+					case "Cube":
 						Attach (hit.collider.gameObject);
 						orientation = save;
+						break;
+					default:
+						orientation = save;
+						break;
 					}
 				}
 			}
@@ -114,31 +123,30 @@ public class Player : MonoBehaviour {
 	
 	public void Jump() {
 		transform.position = attached.transform.position + orientation * ALTITUDE;
-		rigidbody.isKinematic = false;
-		rigidbody.velocity = attached.rigidbody.velocity;
-		rigidbody.AddForce(orientation * EXPLOSION_FORCE * 2);
+		rigidbody2D.isKinematic = false;
+		rigidbody2D.AddForce(orientation * EXPLOSION_FORCE * 2);
 		attached.GetComponent<Cube>().UnAttach();
 		attached = null;
 		gameGUI.Life--;
 	}
 	
 	public void Teleport(Vector3 position) {
-		rigidbody.isKinematic = false;
+		rigidbody2D.isKinematic = false;
 		attached.GetComponent<Cube>().UnAttach();
 		attached = null;
-		transform.position = position + Vector3.up * 0.5f;
+		transform.position = position + Vector3.back * 0.5f;
 	}
 	
 	public void Teleport(GameObject portal) {
-		rigidbody.isKinematic = false;
+		rigidbody2D.isKinematic = false;
 		attached.GetComponent<Cube>().UnAttach();
 		attached = null;
-		transform.position = portal.transform.parent.transform.position + Vector3.up * 0.5f;
+		transform.position = portal.transform.parent.transform.position + Vector3.back * 0.5f;
 	}
 
 	public void AttachedDestroy() {
-		rigidbody.isKinematic = false;
-		rigidbody.velocity = attached.rigidbody.velocity;
+		rigidbody2D.isKinematic = false;
+		rigidbody2D.velocity = attached.rigidbody2D.velocity;
 		attached = null;
 	}
 
@@ -147,11 +155,11 @@ public class Player : MonoBehaviour {
 			orientation = prevuseOrientation;
 		else {
 			Vector3 normal = wall.transform.rotation * Vector3.right;
-			rigidbody.velocity = rigidbody.velocity - 2 * Vector3.Dot(rigidbody.velocity, normal) * normal;
+			rigidbody2D.velocity = Vector3.Reflect(rigidbody2D.velocity, normal);
 		}
 	}
 	
-	void OnTriggerEnter(Collider other) {
+	void OnTriggerEnter2D(Collider2D other) {
 		if (other.gameObject.tag == "Cube" && attached != other.gameObject) {
 			Attach (other.gameObject);
 		}
@@ -159,8 +167,8 @@ public class Player : MonoBehaviour {
 
 	Vector3 FindOrientation(Vector3 targetPosition) {
 		Vector3 colVector = transform.position - targetPosition;
-		Vector3[] sides = new Vector3[] {Vector3.forward, Vector3.back, Vector3.left, Vector3.right, Vector3.down};
-		Vector3 answer = Vector3.up;
+		Vector3[] sides = new Vector3[] {Vector3.back, Vector3.up, Vector3.left, Vector3.right, Vector3.down};
+		Vector3 answer = Vector3.back;
 		float min = Vector3.SqrMagnitude(answer - colVector);
 		foreach (Vector3 v in sides) {
 			float m = Vector3.SqrMagnitude(v - colVector);
@@ -169,8 +177,6 @@ public class Player : MonoBehaviour {
 				answer = v;
 			}
 		}
-		if (answer == Vector3.down)
-			answer = Vector3.up;
 		return answer;
 	}
 
@@ -179,12 +185,13 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Attach(GameObject target) {
-		rigidbody.isKinematic = true;
+		rigidbody2D.isKinematic = true;
 		if (attached != null)
 			attached.GetComponent<Cube>().UnAttach();
 		attached = target;
 		orientation = FindOrientation (target.transform.position);
 		from = transform.position - attached.transform.position;
+		from.Normalize ();
 		prevuseOrientation = Vector3.zero;
 	}
 }

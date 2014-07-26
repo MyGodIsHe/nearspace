@@ -4,12 +4,24 @@ using System.Collections.Generic;
 
 
 public struct Level {
+
+	public const int SIZE = 13;
+	public const int OUT_SIZE = SIZE + 2;
 	
 	public LevelObject[] cubes;
 
 	public Vector2 size;
 
 	public Directions directions;
+
+	string name;
+	string filename;
+
+	public string Name {
+		get {
+			return name;
+		}
+	}
 	
 	public Level(string name) {
 		directions = Directions.All;
@@ -41,7 +53,16 @@ public struct Level {
 			y++;
 		}
 		size = new Vector2(maxX, y);
+		if (size.x != size.y && size.x != SIZE)
+			Debug.Log("Bad Size " + name);
 		this.cubes = cubes.ToArray();
+		filename = name;
+		this.name = doName(filename, "1");
+	}
+	
+	static string doName(string filename, string transposition) {
+		string alph = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		return alph[int.Parse (filename)] + "#" + transposition;
 	}
 
 	public void Transposition() {
@@ -66,7 +87,9 @@ public struct Level {
 	}
 
 	public void RandomTranform() {
-		switch (UnityEngine.Random.Range(1, 8)) {
+		int value = UnityEngine.Random.Range(1, 8);
+		name = doName(filename, value.ToString());
+		switch (value) {
 		case 2:
 			HorizontalReflection();
 			break;
